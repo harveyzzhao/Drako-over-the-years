@@ -60,7 +60,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </style>
 
 
-<script src="../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js" integrity="sha512-bLT0Qm9VnAYZDflyKcBaQ2gg0hSYNQrJ8RilYldYQ1FxQYoCLtUjuuRuZo+fjqhx/qtq/1itJ0C2ejDxltZVFg==" crossorigin="anonymous"></script><script src="../site_libs/quarto-nav/quarto-nav.js"></script>
 <script src="../site_libs/quarto-nav/headroom.min.js"></script>
 <script src="../site_libs/clipboard/clipboard.min.js"></script>
 <script src="../site_libs/quarto-search/autocomplete.umd.js"></script>
@@ -103,6 +103,9 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
     "search-label": "Search"
   }
 }</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.6/require.min.js" integrity="sha512-c3Nl8+7g4LMSTdrm621y7kf9v3SDPnhxLNhcjFJbKECVnmZHTdo+IRO05sNLTH/D3vA6u1X32ehoLC7WFVdheg==" crossorigin="anonymous"></script>
+
+<script type="application/javascript">define('jquery', [],function() {return window.jQuery;})</script>
 
 
 <link rel="stylesheet" href="../styles.css">
@@ -222,7 +225,9 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <p>However, the dataset presented challenges. While there are over 500 rows, only 221 have complete data. Missing information, mainly release dates and album names, was common, especially for singles. Given that singles are a critical aspect of modern music distribution, this posed a potential issue. Some songs might have been excluded due to missing release dates or album associations.</p>
 <p>The scraping process itself was imperfect. Using an older version of lyricsgenius, I encountered issues like non-lyrical annotations (e.g., [Intro], ) embedded in the lyrics. With limited experience in advanced data cleaning, some noise, redundant characters, and annotations likely slipped through.</p>
 <p>Cleaning the dataset was a challenging task. Out of the initial 500+ songs, I filtered out around 300 tracks that were duplicates, live versions, or diss tracks. Despite the simplicity of the API, the cleaning process demanded considerable effort to handle the noise and ensure data quality.</p>
-<div id="cell-6" class="cell">
+<section id="getting-the-dataset" class="level3">
+<h3 class="anchored" data-anchor-id="getting-the-dataset">Getting the dataset</h3>
+<div id="cell-7" class="cell">
 <div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="co"># scraping data</span></span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> lyricsgenius <span class="im">import</span> Genius</span>
 <span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a></span>
@@ -233,8 +238,567 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>artist <span class="op">=</span> genius.search_artist(<span class="st">"Drake"</span>, max_songs<span class="op">=</span><span class="dv">1</span>)</span>
 <span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>lyrics <span class="op">=</span> artist.save_lyrics()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
+</section>
+</section>
+<section id="create-file-paths-dataframe" class="level1">
+<h1>create file paths + dataframe</h1>
+<p>import os import glob import json import pandas as pd</p>
+<p>path = ‘./lyrics_files’ data_list = []</p>
+</section>
+<section id="read-and-process-json-files" class="level1">
+<h1>Read and process JSON files</h1>
+<p>for filename in glob.glob(os.path.join(path, ’*.json’)): # Only process .JSON files in the folder with open(filename, encoding=‘utf-8’, mode=‘r’) as json_file: data = json.load(json_file) songs = data.get(‘songs’, []) for song in songs: data_list.append({ ‘name’: song.get(‘title’), ‘album’: song.get(‘album’), ‘year’: song.get(‘year’), ‘lyrics’: song.get(‘lyrics’) })</p>
+</section>
+<section id="create-dataframe" class="level1">
+<h1>Create DataFrame</h1>
+<p>lyrics_df = pd.DataFrame(data_list, columns=[‘name’, ‘album’, ‘year’, ‘lyrics’])</p>
+<p>Here were the first 10 rows of the raw scraped dataset:</p>
+<div id="cell-10" class="cell">
+<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>lyrics_df.head(<span class="dv">10</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<div>
 
 
+<table class="dataframe caption-top table table-sm table-striped small" data-quarto-postprocess="true" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th">name</th>
+<th data-quarto-table-cell-role="th">album</th>
+<th data-quarto-table-cell-role="th">year</th>
+<th data-quarto-table-cell-role="th">lyrics</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">0</td>
+<td>Good Ones Go (Interlude)</td>
+<td>Take Care</td>
+<td>2011-11-15</td>
+<td>[Intro]\nOh yeah\nOh yeah, oh yeah, oh\nOh yea...</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">1</td>
+<td>Keep the Family Close</td>
+<td>Views</td>
+<td>2016-04-29</td>
+<td>[Intro]\nIt's a little chilly out there\nHow y...</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">2</td>
+<td>Using Me</td>
+<td>None</td>
+<td>None</td>
+<td>Yeah\n6 shit\n\nBeen with so many women I can’...</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">3</td>
+<td>Light Up</td>
+<td>Thank Me Later</td>
+<td>2010-06-15</td>
+<td>[Verse 1: Drake]\nUh, I've been up for four da...</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">4</td>
+<td>Catch No Feelings</td>
+<td>None</td>
+<td>None</td>
+<td>[Drake]\nI told you from the jump, me and you ...</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">5</td>
+<td>These Days</td>
+<td>None</td>
+<td>2016-03-29</td>
+<td>[Verse 1]\nI've been out walking\nI don't do t...</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">6</td>
+<td>Overdose On Life</td>
+<td>None</td>
+<td>2008-04-30</td>
+<td>And I'm a leave on one more note\nOne more mot...</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">7</td>
+<td>Talk Up</td>
+<td>Scorpion</td>
+<td>2018-06-29</td>
+<td>[Intro: Drake]\nDJ Paul\nTWhy\nAyy, ayy\nLot o...</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">8</td>
+<td>Cannonball</td>
+<td>Heartbreak Drake</td>
+<td>None</td>
+<td>[Chorus: Colin Munroe]\nHow could I fly, but l...</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">9</td>
+<td>Thank You Note to 40</td>
+<td>None</td>
+<td>2016-04-28</td>
+<td>Before we do this I just wanna say thanks man....</td>
+</tr>
+</tbody>
+</table>
+
+</div>
+</div>
+</div>
+<p>We are getting a lot of null values in album and year. We will only keep offically released songs for analysis, so any songs without an album or a release date needs to be gone.</p>
+<section id="cleaning-dataset" class="level3">
+<h3 class="anchored" data-anchor-id="cleaning-dataset">Cleaning Dataset</h3>
+<div id="cell-13" class="cell">
+<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="co"># remove all rows that have null values</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>lyrics_df <span class="op">=</span> lyrics_df.dropna(how<span class="op">=</span><span class="st">'any'</span>, axis<span class="op">=</span><span class="dv">0</span>)</span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>lyrics_df.info()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>&lt;class 'pandas.core.frame.DataFrame'&gt;
+Index: 221 entries, 0 to 390
+Data columns (total 4 columns):
+ #   Column  Non-Null Count  Dtype 
+---  ------  --------------  ----- 
+ 0   name    221 non-null    object
+ 1   album   221 non-null    object
+ 2   year    221 non-null    object
+ 3   lyrics  221 non-null    object
+dtypes: object(4)
+memory usage: 8.6+ KB</code></pre>
+</div>
+</div>
+<p>Voila, we dropped almost half of the entire database and retained 221 valid songs Drake released. Let’s take a look at the first 5 rows:</p>
+<div id="cell-15" class="cell">
+<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>lyrics_df.head()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<div>
+
+
+<table class="dataframe caption-top table table-sm table-striped small" data-quarto-postprocess="true" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th">name</th>
+<th data-quarto-table-cell-role="th">album</th>
+<th data-quarto-table-cell-role="th">year</th>
+<th data-quarto-table-cell-role="th">lyrics</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">0</td>
+<td>Good Ones Go (Interlude)</td>
+<td>Take Care</td>
+<td>2011-11-15</td>
+<td>[Intro]\nOh yeah\nOh yeah, oh yeah, oh\nOh yea...</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">1</td>
+<td>Keep the Family Close</td>
+<td>Views</td>
+<td>2016-04-29</td>
+<td>[Intro]\nIt's a little chilly out there\nHow y...</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">3</td>
+<td>Light Up</td>
+<td>Thank Me Later</td>
+<td>2010-06-15</td>
+<td>[Verse 1: Drake]\nUh, I've been up for four da...</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">7</td>
+<td>Talk Up</td>
+<td>Scorpion</td>
+<td>2018-06-29</td>
+<td>[Intro: Drake]\nDJ Paul\nTWhy\nAyy, ayy\nLot o...</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">10</td>
+<td>Juice</td>
+<td>Born Successful</td>
+<td>2009-12-11</td>
+<td>[Produced by Boi-1da]\n\n[Intro]\nBoi-1da... D...</td>
+</tr>
+</tbody>
+</table>
+
+</div>
+</div>
+</div>
+<p>I was debating whether I should include the month and date of release. However, Drake releases often and emotion of his songs fluctuates frequently. We happen to have a 200+ row dataset that spans 10+ years. Let’s remove the month and date for every song’s release date.</p>
+<div id="cell-17" class="cell">
+<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>lyrics_df[<span class="st">'year'</span>] <span class="op">=</span> pd.to_datetime(lyrics_df[<span class="st">'year'</span>]).dt.strftime(<span class="st">'%Y'</span>)</span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>lyrics_df <span class="op">=</span> lyrics_df.sort_values(<span class="st">'album'</span>)</span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>lyrics_df.head()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<div>
+
+
+<table class="dataframe caption-top table table-sm table-striped small" data-quarto-postprocess="true" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th">name</th>
+<th data-quarto-table-cell-role="th">album</th>
+<th data-quarto-table-cell-role="th">year</th>
+<th data-quarto-table-cell-role="th">lyrics</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">155</td>
+<td>Right to Left</td>
+<td>Born Successful</td>
+<td>2009</td>
+<td>[Intro]\n[?]\n\n[Chorus: Drake]\nBlue green je...</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">200</td>
+<td>Forever (Born Successful)</td>
+<td>Born Successful</td>
+<td>2009</td>
+<td>[Chorus: Drake]\nIt may not mean nothing to y'...</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">189</td>
+<td>The Winner</td>
+<td>Born Successful</td>
+<td>2009</td>
+<td>[Verse 1]\nI’m performing tonight you know tha...</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">181</td>
+<td>I Do This</td>
+<td>Born Successful</td>
+<td>2009</td>
+<td>[Verse 1: Drake]\nUh, shit's all good\nThe dea...</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">120</td>
+<td>Fallen</td>
+<td>Born Successful</td>
+<td>2009</td>
+<td>[Intro: Drake]\nYeah, it's Drake, KC\n\n[Verse...</td>
+</tr>
+</tbody>
+</table>
+
+</div>
+</div>
+</div>
+<p>The scraped lyrics contain special characters like <em>and </em>[intro]*. Let’s try clean up the lyrics so we get exactly what Drake raps. We will use regex to filter out structure words like “outro”, “chorus” and “intro” and do some other magic on a few songs that we have to clean up manually.</p>
+<div id="cell-19" class="cell">
+<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> re</span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> clean_lyrics(lyrics):</span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> <span class="kw">not</span> lyrics:</span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> lyrics</span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Remove apostrophes</span></span>
+<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a>    lyrics <span class="op">=</span> lyrics.replace(<span class="st">"'"</span>, <span class="st">""</span>)</span>
+<span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-10"><a href="#cb7-10" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Remove song structure tags or instructions in brackets</span></span>
+<span id="cb7-11"><a href="#cb7-11" aria-hidden="true" tabindex="-1"></a>    lyrics <span class="op">=</span> re.sub(<span class="vs">r'[\*\[\(\{].*?[\*\]\)\}]'</span>, <span class="st">' '</span>, lyrics)</span>
+<span id="cb7-12"><a href="#cb7-12" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb7-13"><a href="#cb7-13" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Remove variations of Verse 1, VERSE 2, etc.</span></span>
+<span id="cb7-14"><a href="#cb7-14" aria-hidden="true" tabindex="-1"></a>    lyrics <span class="op">=</span> re.sub(<span class="vs">r'\b[Vv]erse \d+\b'</span>, <span class="st">''</span>, lyrics)</span>
+<span id="cb7-15"><a href="#cb7-15" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb7-16"><a href="#cb7-16" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Remove specific structure markers formatted as all caps without brackets</span></span>
+<span id="cb7-17"><a href="#cb7-17" aria-hidden="true" tabindex="-1"></a>    structure_words <span class="op">=</span> [<span class="st">'OUTRO'</span>, <span class="st">'INSTRUMENTAL'</span>, <span class="st">'PRE'</span>, <span class="st">'HOOK'</span>, <span class="st">'PRODUCED'</span>, <span class="st">'REFRAIN'</span>, </span>
+<span id="cb7-18"><a href="#cb7-18" aria-hidden="true" tabindex="-1"></a>                       <span class="st">'POST'</span>, <span class="st">'REPEAT'</span>, <span class="st">'2x'</span>, <span class="st">'3x'</span>, <span class="st">'4x'</span>, <span class="st">'CHORUS'</span>, <span class="st">'INTRO'</span>, <span class="st">'INTERLUDE'</span>]</span>
+<span id="cb7-19"><a href="#cb7-19" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> word <span class="kw">in</span> structure_words:</span>
+<span id="cb7-20"><a href="#cb7-20" aria-hidden="true" tabindex="-1"></a>        lyrics <span class="op">=</span> lyrics.replace(word, <span class="st">''</span>)</span>
+<span id="cb7-21"><a href="#cb7-21" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb7-22"><a href="#cb7-22" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Remove variations of Chorus, Intro, Instrumental, Bridge, Hook, Repeat</span></span>
+<span id="cb7-23"><a href="#cb7-23" aria-hidden="true" tabindex="-1"></a>    lyrics <span class="op">=</span> re.sub(<span class="vs">r'\b[Cc]horus\b.*'</span>, <span class="st">''</span>, lyrics)</span>
+<span id="cb7-24"><a href="#cb7-24" aria-hidden="true" tabindex="-1"></a>    lyrics <span class="op">=</span> re.sub(<span class="vs">r'\b[Ii]ntro\b.*'</span>, <span class="st">''</span>, lyrics)</span>
+<span id="cb7-25"><a href="#cb7-25" aria-hidden="true" tabindex="-1"></a>    lyrics <span class="op">=</span> re.sub(<span class="vs">r'\b[Ii]nstrumental\b.*'</span>, <span class="st">''</span>, lyrics)</span>
+<span id="cb7-26"><a href="#cb7-26" aria-hidden="true" tabindex="-1"></a>    lyrics <span class="op">=</span> re.sub(<span class="vs">r'\b[Bb]ridge\b.*'</span>, <span class="st">''</span>, lyrics)</span>
+<span id="cb7-27"><a href="#cb7-27" aria-hidden="true" tabindex="-1"></a>    lyrics <span class="op">=</span> re.sub(<span class="vs">r'\b[Hh]ook\b.*'</span>, <span class="st">''</span>, lyrics)</span>
+<span id="cb7-28"><a href="#cb7-28" aria-hidden="true" tabindex="-1"></a>    lyrics <span class="op">=</span> re.sub(<span class="vs">r'\b[Rr]epeat\b.*'</span>, <span class="st">''</span>, lyrics)</span>
+<span id="cb7-29"><a href="#cb7-29" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-30"><a href="#cb7-30" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Remove credits</span></span>
+<span id="cb7-31"><a href="#cb7-31" aria-hidden="true" tabindex="-1"></a>    lyrics <span class="op">=</span> re.sub(<span class="vs">r'.*[Pp]roduced [Bb]y.*'</span>, <span class="st">' '</span>, lyrics)</span>
+<span id="cb7-32"><a href="#cb7-32" aria-hidden="true" tabindex="-1"></a>    lyrics <span class="op">=</span> re.sub(<span class="vs">r'.*[Ww]ritten [Bb]y.*'</span>, <span class="st">' '</span>, lyrics)</span>
+<span id="cb7-33"><a href="#cb7-33" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb7-34"><a href="#cb7-34" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Remove strays and typos</span></span>
+<span id="cb7-35"><a href="#cb7-35" aria-hidden="true" tabindex="-1"></a>    stray_patterns <span class="op">=</span> [</span>
+<span id="cb7-36"><a href="#cb7-36" aria-hidden="true" tabindex="-1"></a>        <span class="vs">r'\[Outro\['</span>, <span class="vs">r'Sax &amp; background &amp; instrumental\)'</span>, <span class="vs">r'\nSource: '</span>, </span>
+<span id="cb7-37"><a href="#cb7-37" aria-hidden="true" tabindex="-1"></a>        <span class="vs">r'Shotgun 2: 58 Trk 1 \n  \nJr. Walker &amp; The All Stars \nAnd/or The Funk Brothers - instrumental \nPop Chart #4 Feb 13, 1965 \nSoul Label - 35008 \n '</span>,</span>
+<span id="cb7-38"><a href="#cb7-38" aria-hidden="true" tabindex="-1"></a>        <span class="vs">r'- musical interlude -'</span>, <span class="vs">r'\nRefrain:'</span></span>
+<span id="cb7-39"><a href="#cb7-39" aria-hidden="true" tabindex="-1"></a>    ]</span>
+<span id="cb7-40"><a href="#cb7-40" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> pattern <span class="kw">in</span> stray_patterns:</span>
+<span id="cb7-41"><a href="#cb7-41" aria-hidden="true" tabindex="-1"></a>        lyrics <span class="op">=</span> re.sub(pattern, <span class="st">' '</span>, lyrics)</span>
+<span id="cb7-42"><a href="#cb7-42" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb7-43"><a href="#cb7-43" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Replace all punctuations with spaces</span></span>
+<span id="cb7-44"><a href="#cb7-44" aria-hidden="true" tabindex="-1"></a>    lyrics <span class="op">=</span> re.sub(<span class="vs">r'[^\w\s]'</span>, <span class="st">' '</span>, lyrics)</span>
+<span id="cb7-45"><a href="#cb7-45" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb7-46"><a href="#cb7-46" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Replace consecutive whitespaces with a single space</span></span>
+<span id="cb7-47"><a href="#cb7-47" aria-hidden="true" tabindex="-1"></a>    lyrics <span class="op">=</span> re.sub(<span class="vs">r'\s+'</span>, <span class="st">' '</span>, lyrics).strip()</span>
+<span id="cb7-48"><a href="#cb7-48" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb7-49"><a href="#cb7-49" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Convert all tokens to lowercase</span></span>
+<span id="cb7-50"><a href="#cb7-50" aria-hidden="true" tabindex="-1"></a>    lyrics <span class="op">=</span> lyrics.lower()</span>
+<span id="cb7-51"><a href="#cb7-51" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-52"><a href="#cb7-52" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> lyrics</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div id="cell-20" class="cell">
+<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>lyrics_df[<span class="st">'lyrics'</span>] <span class="op">=</span> lyrics_df[<span class="st">'lyrics'</span>].<span class="bu">map</span>(clean_lyrics)</span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>lyrics_df.head()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<div>
+
+
+<table class="dataframe caption-top table table-sm table-striped small" data-quarto-postprocess="true" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th">name</th>
+<th data-quarto-table-cell-role="th">album</th>
+<th data-quarto-table-cell-role="th">year</th>
+<th data-quarto-table-cell-role="th">lyrics</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">155</td>
+<td>Right to Left</td>
+<td>Born Successful</td>
+<td>2009</td>
+<td>blue green jewels with the supreme fuel and lo...</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">200</td>
+<td>Forever (Born Successful)</td>
+<td>Born Successful</td>
+<td>2009</td>
+<td>it may not mean nothing to yall but understand...</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">189</td>
+<td>The Winner</td>
+<td>Born Successful</td>
+<td>2009</td>
+<td>i m performing tonight you know that shit gone...</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">181</td>
+<td>I Do This</td>
+<td>Born Successful</td>
+<td>2009</td>
+<td>uh shits all good the deal got signed and my s...</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">120</td>
+<td>Fallen</td>
+<td>Born Successful</td>
+<td>2009</td>
+<td>yeah its drake kc we was just walking just smi...</td>
+</tr>
+</tbody>
+</table>
+
+</div>
+</div>
+</div>
+<p>As you can see, lyrics are essentially a transcript of Drake’s songs now. We are done with cleaning the data!</p>
+</section>
+<section id="high-level-overview-of-dataset" class="level3">
+<h3 class="anchored" data-anchor-id="high-level-overview-of-dataset">High Level Overview of Dataset</h3>
+<p>Let’s look at 5 details in our dataset to gauge what data we are dealing with. 1) How many songs did Drake release 2) Number of albums 3) Number of years Drake made a release 4) First and last year of songs in this table 5) Word count distribution of Drake’s songs</p>
+<p>You can view the detailed code at https://github.com/harveyzzhao/DH140.</p>
+<ul>
+<li><p>Drake had <strong>221</strong> officially released songs and <strong>22</strong> albums in this dataset. Compared to other hip hop artists, Drake was one of the most productive.</p></li>
+<li><p>This dataset spans 14 years from <strong>2006 to 2019.</strong></p></li>
+</ul>
+<p>Drake releases more than 5 songs most years up to <strong>30+ songs</strong> in 2009. Hmm, he must have been really hardworking back then or something else is going on…</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="./drake-song-per-year.png" class="img-fluid figure-img"></p>
+<figcaption>image.png</figcaption>
+</figure>
+</div>
+<p>Drake on average has <strong>500+</strong> words per song. He had a mere <strong>9 (!!!)</strong> words for his least verbose song, and <strong>1122</strong> words for his most verbose song (is he writing an essay??)</p>
+<p>He was the most verbose in 2013, where he smashed his maximum word count record and did not drop below 500 words in one of his least verbose song. He visibly spiked his word count from 2013 to 2015. It just happened to be the 3 years before his most successful years in terms of new listener count, spotify streams and number of songs on billboard top 100.</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="./drake-word-count-distribution.png" class="img-fluid figure-img"></p>
+<figcaption>image.png</figcaption>
+</figure>
+</div>
+<p>I was interested to see his most verbose songs and least verbose songs. Here is a breakdown of the top 5 most verbose and the top 5 least verbose songs.</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="./top-verbose-songs.png" class="img-fluid figure-img"></p>
+<figcaption>image.png</figcaption>
+</figure>
+</div>
+</section>
+<section id="focused-analysis" class="level3">
+<h3 class="anchored" data-anchor-id="focused-analysis">Focused Analysis</h3>
+<p>Now we have analyzed word count of Drake’s songs, and his productivity over the years, let’s dive into his song’s emotions.</p>
+<p>To analyze Drake’s lyrics and identify distinct periods in his music career, we will follow a structured approach focusing on sentiment analysis, keyword analysis, and lexical diversity. #### sentiment analysis First, we will use ntlk to break each song’s lyrics into words and use ntlk’s opinion lexicon to get the sentiment of each word in lyrics. Then, we will add up the sentiment score of every word and compare all songs into a barchart. Then, we will model his 200+ songs with a trendline.</p>
+<section id="how-to-find-distinct-periods" class="level4">
+<h4 class="anchored" data-anchor-id="how-to-find-distinct-periods">How to find distinct periods</h4>
+<p>To identify distinct periods, we will combine the results from sentiment analysis, keyword frequency, and lexical diversity into a single dataset. Using clustering algorithms like K-means, we will segment the songs into groups based on these features, revealing natural groupings that indicate different phases in Drake’s music career. Through these detailed analyses, we aim to provide a comprehensive understanding of how Drake’s sentiment has evolved over time.</p>
+</section>
+<section id="sentiment-analysis" class="level4">
+<h4 class="anchored" data-anchor-id="sentiment-analysis">Sentiment Analysis</h4>
+<p>We are using two different sentiment analyzers, <strong>VADER</strong> and nltk’s <strong>opinion lexicon</strong> to get a more unbiased opinion of Drake’s lyrics. First, we will use Vader’s sentiment analyzer to model the sentiment of Drake’s songs. <strong>VADER (Valence Aware Dictionary and sEntiment Reasoner)</strong> is designed for analyzing sentiment in <strong>social media</strong> texts. It combines a sentiment lexicon with rules to handle punctuation, capitalization, and intensity modifiers, making it effective for informal text analysis.</p>
+<p><strong>Why I chose Vader for sentiment analysis</strong></p>
+<p>VADER is well-suited for analyzing Drake’s lyrics due to its adaptability to social media language, ability to capture nuances in sentiment, and straightforward implementation. It efficiently quantifies sentiment, handling elements like slang, emphasis, and intensity, which are common in song lyrics.</p>
+<div id="cell-35" class="cell">
+<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> nltk</span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> matplotlib.pyplot <span class="im">as</span> plt</span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> nltk.tokenize <span class="im">import</span> word_tokenize</span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> nltk.sentiment <span class="im">import</span> vader</span>
+<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> nltk.corpus <span class="im">import</span> stopwords</span>
+<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> nltk.stem.porter <span class="im">import</span> PorterStemmer</span>
+<span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-9"><a href="#cb9-9" aria-hidden="true" tabindex="-1"></a>nltk.download(<span class="st">"stopwords"</span>)</span>
+<span id="cb9-10"><a href="#cb9-10" aria-hidden="true" tabindex="-1"></a>nltk.download(<span class="st">"vader_lexicon"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>[nltk_data] Downloading package stopwords to
+[nltk_data]     /Users/harvey/nltk_data...
+[nltk_data]   Package stopwords is already up-to-date!
+[nltk_data] Downloading package vader_lexicon to
+[nltk_data]     /Users/harvey/nltk_data...
+[nltk_data]   Package vader_lexicon is already up-to-date!</code></pre>
+</div>
+<div class="cell-output cell-output-display">
+<pre><code>True</code></pre>
+</div>
+</div>
+<div id="cell-36" class="cell">
+<div class="sourceCode cell-code" id="cb12"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>stopwords_set <span class="op">=</span> <span class="bu">set</span>(stopwords.words(<span class="st">"english"</span>))</span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>sentiment_analyzer <span class="op">=</span> vader.SentimentIntensityAnalyzer()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div id="cell-37" class="cell">
+<div class="sourceCode cell-code" id="cb13"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> pandas <span class="im">as</span> pd</span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>df <span class="op">=</span> pd.read_csv(<span class="st">"lyrics.csv"</span>)</span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>df[<span class="st">'tokenized'</span>] <span class="op">=</span> df[<span class="st">'lyrics'</span>].<span class="bu">apply</span>(word_tokenize)</span>
+<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a>sentiment_scores_vader <span class="op">=</span> []</span>
+<span id="cb13-6"><a href="#cb13-6" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> tokens <span class="kw">in</span> df[<span class="st">"tokenized"</span>]:</span>
+<span id="cb13-7"><a href="#cb13-7" aria-hidden="true" tabindex="-1"></a>  song_sentiment_score <span class="op">=</span> <span class="bu">sum</span>([sentiment_analyzer.polarity_scores(token)[<span class="st">"compound"</span>] <span class="cf">for</span> token <span class="kw">in</span> tokens])</span>
+<span id="cb13-8"><a href="#cb13-8" aria-hidden="true" tabindex="-1"></a>  sentiment_scores_vader.append(song_sentiment_score)</span>
+<span id="cb13-9"><a href="#cb13-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-10"><a href="#cb13-10" aria-hidden="true" tabindex="-1"></a>plt.bar(<span class="bu">list</span>(<span class="bu">range</span>(<span class="bu">len</span>(df))), sentiment_scores_vader)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<pre><code>&lt;BarContainer object of 221 artists&gt;</code></pre>
+</div>
+<div class="cell-output cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="blog_files/figure-html/cell-11-output-2.png" class="img-fluid figure-img"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>This graph doesn’t make much sense. Each bar is very thin and we can’t easily see a pattern without having release date as the x axis. Let’s group each song’s sentiment by year of release and use a box plot to show distribution of each year’s sentiment.</p>
+<div id="cell-39" class="cell">
+<div class="sourceCode cell-code" id="cb15"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a>df[<span class="st">"sentiment_scores_vader"</span>] <span class="op">=</span> sentiment_scores_vader</span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a>df_boxplot <span class="op">=</span> df.groupby(<span class="st">"year"</span>)[<span class="st">"sentiment_scores_vader"</span>].<span class="bu">apply</span>(<span class="bu">list</span>).reset_index(name<span class="op">=</span><span class="st">"scores"</span>)</span>
+<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-5"><a href="#cb15-5" aria-hidden="true" tabindex="-1"></a><span class="co"># Create a boxplot for each year's sentiment scores</span></span>
+<span id="cb15-6"><a href="#cb15-6" aria-hidden="true" tabindex="-1"></a>plt.figure(figsize<span class="op">=</span>(<span class="dv">10</span>, <span class="dv">7</span>))</span>
+<span id="cb15-7"><a href="#cb15-7" aria-hidden="true" tabindex="-1"></a>plt.boxplot(df_boxplot[<span class="st">'scores'</span>], labels<span class="op">=</span>df_boxplot[<span class="st">'year'</span>])</span>
+<span id="cb15-8"><a href="#cb15-8" aria-hidden="true" tabindex="-1"></a>plt.xlabel(<span class="st">'Year'</span>)</span>
+<span id="cb15-9"><a href="#cb15-9" aria-hidden="true" tabindex="-1"></a>plt.ylabel(<span class="st">'Sentiment Scores'</span>)</span>
+<span id="cb15-10"><a href="#cb15-10" aria-hidden="true" tabindex="-1"></a>plt.title(<span class="st">'Boxplot of Sentiment Scores per Year'</span>)</span>
+<span id="cb15-11"><a href="#cb15-11" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="blog_files/figure-html/cell-12-output-1.png" class="img-fluid figure-img"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>Now we can clearly see how sentiment roughly changes year by year. From 2006 to 2007, Drake kept his lyrics positive, with the most negative song being much more positive than the most negative quartile of songs in 2014. This stage also displayed quite a small variation, especially 2007 where the middle 50% of songs are the most similar in sentiment among all of his songs. To see what it means to be neutral in sentiment (0 sentiment score), positive (0-5), and negative (0 to -5), let’s pick 2 songs from each category.</p>
+<div id="cell-41" class="cell">
+<div class="sourceCode cell-code" id="cb16"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Select 2 songs with neutral sentiment</span></span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a>neutral_songs <span class="op">=</span> df[(df[<span class="st">'sentiment_scores_vader'</span>] <span class="op">&lt;=</span> <span class="fl">0.2</span>) <span class="op">&amp;</span> (df[<span class="st">"sentiment_scores_vader"</span>] <span class="op">&gt;</span> <span class="op">-</span><span class="fl">0.2</span>)].sample(<span class="dv">2</span>)[<span class="st">'name'</span>]</span>
+<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-4"><a href="#cb16-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Select 2 songs with positive sentiment</span></span>
+<span id="cb16-5"><a href="#cb16-5" aria-hidden="true" tabindex="-1"></a>positive_songs <span class="op">=</span> df[(df[<span class="st">'sentiment_scores_vader'</span>] <span class="op">&gt;</span> <span class="fl">0.2</span>) <span class="op">&amp;</span> (df[<span class="st">'sentiment_scores_vader'</span>] <span class="op">&lt;=</span> <span class="dv">5</span>)].sample(<span class="dv">2</span>)[<span class="st">'name'</span>]</span>
+<span id="cb16-6"><a href="#cb16-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-7"><a href="#cb16-7" aria-hidden="true" tabindex="-1"></a><span class="co"># Select 2 songs with negative sentiment</span></span>
+<span id="cb16-8"><a href="#cb16-8" aria-hidden="true" tabindex="-1"></a>negative_songs <span class="op">=</span> df[(df[<span class="st">'sentiment_scores_vader'</span>] <span class="op">&lt;=</span> <span class="fl">0.2</span>) <span class="op">&amp;</span> (df[<span class="st">'sentiment_scores_vader'</span>] <span class="op">&gt;=</span> <span class="op">-</span><span class="dv">5</span>)].sample(<span class="dv">2</span>)[<span class="st">'name'</span>]</span>
+<span id="cb16-9"><a href="#cb16-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-10"><a href="#cb16-10" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"Neutral songs: "</span>, neutral_songs.values)</span>
+<span id="cb16-11"><a href="#cb16-11" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"Positive songs: "</span>, positive_songs.values)</span>
+<span id="cb16-12"><a href="#cb16-12" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"Negative songs: "</span>, negative_songs.values)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Neutral songs:  ['Marvin’s Room' 'November 18th']
+Positive songs:  ['Glow' 'Asthma Team']
+Negative songs:  ['Stunt Hard' 'Karaoke']</code></pre>
+</div>
+</div>
+<p>We choose <em>Nothing Into Somethings</em> as neutral song,* Hotline Bling* as positive song, and <em>I Do This</em> as negative song.</p>
+<p>They have a score of 0.13, 4.56 and -1.78. Let’s investigate what each number means.</p>
+<div id="cell-43" class="cell">
+<div class="sourceCode cell-code" id="cb18"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(df.loc[df[<span class="st">"name"</span>] <span class="op">==</span> <span class="st">"Nothings Into Somethings"</span>][<span class="st">"sentiment_scores_vader"</span>])</span>
+<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(df.loc[df[<span class="st">"name"</span>] <span class="op">==</span> <span class="st">"Hotline Bling"</span>][<span class="st">"sentiment_scores_vader"</span>])</span>
+<span id="cb18-4"><a href="#cb18-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-5"><a href="#cb18-5" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(df.loc[df[<span class="st">"name"</span>] <span class="op">==</span> <span class="st">"I Do This"</span>][<span class="st">"sentiment_scores_vader"</span>])</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>52    0.1313
+Name: sentiment_scores_vader, dtype: float64
+200    4.5687
+Name: sentiment_scores_vader, dtype: float64
+3   -1.7778
+Name: sentiment_scores_vader, dtype: float64</code></pre>
+</div>
+</div>
+</section>
+<section id="neutral-song---nothing-into-somethings-analysis" class="level4">
+<h4 class="anchored" data-anchor-id="neutral-song---nothing-into-somethings-analysis">Neutral Song - <em>Nothing Into Somethings</em> analysis</h4>
+</section>
+<section id="nothing-into-something-lyrics-analysis" class="level4">
+<h4 class="anchored" data-anchor-id="nothing-into-something-lyrics-analysis">Nothing into Something Lyrics Analysis</h4>
+<p>Drake’s song “Nothing Into Somethings” is generally viewed as having a neutral to slightly negative connotation. The song deals with themes of reflection and the complexities of relationships and success.</p>
+<p>A sentiment score of near 0 means Drake did not mention any violence, suicidal or generally depressing topics. Drake simply told his personal issues - a failed relationship and the emotional toll it takes.</p>
+</section>
+<section id="nothing-into-somethings-lyrics" class="level4">
+<h4 class="anchored" data-anchor-id="nothing-into-somethings-lyrics">Nothing Into Somethings Lyrics:</h4>
+<p>You’ll hear some slow tracks, you know what I’m sayin’?</p>
+<p>With, like, some pimpin’ to it, or somethin’</p>
+<p>That you can relax, pop a top to, or somethin’?</p>
+<p>Big cup of Act’, I’m drowsy</p>
+<p>I’m still posted up where you first found me</p>
+<p>Did I just read that you just got engaged on me?</p>
+<p>I heard from your friend, you couldn’t even tell me</p>
+<p>Or better yet wait on me</p>
+<p>Nah, sha-nah-nah-nah-nah-nah-nah Sha-nah-nah-nah-nah-nah-nah</p>
+<p>Can’t just leave it off that way Sha-nah-nah-nah-nah-nah-nah Sha-nah-nah-nah (nah)</p>
+<p>Can’t just leave it off that way, nah Least, do I get an invitation or something?</p>
+<p>A statement or something?</p>
+<p>Ask about that, you would say it was nothing</p>
+<p>But here’s another nothing that you made into something</p>
+<p>Can’t just leave it off that way</p>
+</section>
+<section id="positive-song---hotline-bling-analysis" class="level4">
+<h4 class="anchored" data-anchor-id="positive-song---hotline-bling-analysis">Positive Song - <em>Hotline Bling</em> Analysis</h4>
+<p>“Hotline Bling” is positive because it combines Drake’s reflection on an ex-partner with an upbeating tone. Drake wrote playful lyrics and reminisced about the girl’s independent past. However, in the lyrics he wished nothing bad for the girl and wondered how she was now.</p>
+<p>Most importantly, Drake did not express his resentment towards his ex or insulted amnyone. Instead, he called his ex “my love”, and descrived good times Drake and his ex spent. I would qualify this song as a positive for sure.</p>
+</section>
+<section id="hotline-bling-lyrics" class="level4">
+<h4 class="anchored" data-anchor-id="hotline-bling-lyrics">Hotline Bling Lyrics</h4>
+<p>You used to call me on my</p>
+<p>You used to, you used to</p>
+<p>Yeah</p>
+<p>You used to call me on my cell phone</p>
+<p>Late night when you need my love</p>
+<p>Call me on my cell phone</p>
+<p>Late night when you need my love</p>
+
+
+</section>
+</section>
 </section>
 
 </main> <!-- /main -->
